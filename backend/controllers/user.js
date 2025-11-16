@@ -35,48 +35,46 @@ export const signup = async (req, res) => {
   }
 };
 
+export const login = async (req, res) => {
+  const { email, password } = req.body;
+  try {
+    const user = User.findOne({ email });
 
-export const login = async*(req,res)=>{
-    const {email,password} = req.body
-    try{
-const user  = User.findOne({email})
+    if (!user) return res.status(401).json({ error: "User not found" });
+    const isMatch = bcrypt.compare(password, user.password);
 
-if(!user) return res.status(401).json({error:"User not found"})
-    const isMatch = bcrypt.compare(password,user.password);
+    if (!isMatch) {
+      return res.status(401).json({ error: "Invalid credentials" });
+    }
 
-
-if(!isMatch){
-    return res.status(401).json({error:"Invalid credentials"})
-}
-
-  const token = jwt.sign(
+    const token = jwt.sign(
       {
         _id: user._id,
         role: user.role,
       },
       process.env.JWT_SECRET
     );
-res.json({user,token});
-    }
-    catch (error){
- res.status(500).json({
+    res.json({ user, token });
+  } catch (error) {
+    res.status(500).json({
       error: "signup failed",
       details: error.message,
     });
-    }
-}
+  }
+};
 
-export const logout = async(req,res)=>{
-    try {
-        const token = req.headers.authorization.split(" ")[1]
-        if(!token) return res.status(401).json({error:"unauthorized"})
-            jwt.verify(token,process.env.JWT_SECRET,(err,decoded)=>{
-        if(err) return res.status(401).json({
-            error:"unauthorized"
-        })});
-        res.json({message:"Logout sucessfully"})
-    } catch (error) {
-           res.status(500).json({ error: "Logout failed", details: error.message });
- 
-    }
-}
+export const logout = async (req, res) => {
+  try {
+    const token = req.headers.authorization.split(" ")[1];
+    if (!token) return res.status(401).json({ error: "unauthorized" });
+    jwt.verify(token, process.env.JWT_SECRET, (err, decoded) => {
+      if (err)
+        return res.status(401).json({
+          error: "unauthorized",
+        });
+    });
+    res.json({ message: "Logout sucessfully" });
+  } catch (error) {
+    res.status(500).json({ error: "Logout failed", details: error.message });
+  }
+};
