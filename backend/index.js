@@ -5,7 +5,6 @@ import dotenv from "dotenv";
 
 import userRoutes from "./routes/user.js";
 
-import mongoose from "mongoose";
 import { serve } from "inngest/express";
 import ticketRoutes from "./routes/ticket.js";
 import { inngest } from "./inngest/client.js";
